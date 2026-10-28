@@ -1,0 +1,25 @@
+.imports-page { overflow-wrap: anywhere; }
+.import-sections, .import-form, .import-secret, .import-field { display: grid; gap: 12px; }
+.import-form label { font-weight: 650; }
+.import-form input, .import-form textarea, .import-form select { width: 100%; min-width: 0; min-height: var(--tap); padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--card); color: var(--ink); font: inherit; caret-color: var(--accent); }
+.import-items { min-width: 0; padding: 0; border: 0; display: grid; gap: 12px; }
+.import-items legend { font-weight: 650; padding: 0; margin-bottom: 12px; }
+.import-line-item { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+.import-form .import-checkbox { min-height: var(--tap); display: flex; align-items: center; gap: 12px; }
+.import-form .import-checkbox input { width: 24px; min-height: 24px; height: 24px; accent-color: var(--accent); }
+.import-form textarea { resize: vertical; line-height: 1.5; }
+.import-form input::placeholder { color: var(--mute); }
+.import-form input[type="file"] { padding: 10px; }
+.import-form input::file-selector-button { min-height: 52px; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin-right: 8px; font: inherit; }
+.import-error { color: var(--red); }
+.import-notice { color: var(--accent); }
+.import-row-link { display: block; padding: 12px 0; min-height: var(--tap); flex: 1; }
+.import-access-row { padding: 16px 0; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+.import-access-row:first-child { border-top: 0; }
+.import-details { margin: 0; display: grid; gap: 12px; }
+.import-details dt { color: var(--mute); }
+.import-details dd { margin: 2px 0 0; white-space: pre-wrap; font-variant-numeric: tabular-nums; }
+.import-secret { border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 12px; }
+.imports-page a:hover { text-decoration-thickness: 2px; }
+.imports-page ::selection { background: var(--accent); color: #fff; }
+@media (max-width: 380px) { .imports-page .row { flex-wrap: wrap; } }

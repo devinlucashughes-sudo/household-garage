@@ -1,0 +1,511 @@
+/* Costs: the car and household Costs pages and each kind of cost opened from them. */
+
+/*
+ * One color per kind of cost, in the fixed order of COST_CATEGORIES. Checked as a set for color-blind
+ * separation between neighbors in a bar. Yellow is under 3:1 on white, so every bar sits beside written labels.
+ */
+.cat-fuel { --cat: #009b8f; }
+.cat-oil { --cat: #e8a317; }
+.cat-tires { --cat: #5b4fcf; }
+.cat-maintenance { --cat: #5f9e1f; }
+.cat-repairs { --cat: #d4609a; }
+.cat-body { --cat: #c2410c; }
+
+.cat-icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cost-page {
+  min-width: 0;
+}
+
+/* Period pills: All time, then years */
+
+.periods {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 2px var(--gutter);
+  scrollbar-width: none;
+}
+
+.periods::-webkit-scrollbar {
+  display: none;
+}
+
+.periods a {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--mute);
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
+}
+
+.periods a[aria-current="page"] {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* The big number */
+
+.cost-hero {
+  gap: 4px;
+}
+
+.cost-hero-label {
+  color: var(--mute);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cost-hero-total {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-hero-sub {
+  color: var(--mute);
+  font-size: 14.5px;
+}
+
+.cost-note {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--mute);
+  font-size: 14.5px;
+}
+
+/* Shares as one bar, with 2 px gaps between pieces */
+
+.share-bar {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin: 12px 0 4px;
+}
+
+.share-bar span {
+  min-width: 4px;
+  border-radius: 4px;
+  background: var(--cat, var(--car));
+}
+
+/* A row per kind of cost, or per car */
+
+.cost-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cost-rows li + li {
+  border-top: 1px solid var(--line);
+}
+
+.cost-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.cost-row::after {
+  content: "›";
+  color: var(--faint);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.cost-row:active {
+  background: var(--field);
+}
+
+.cost-swatch {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--cat) 16%, white);
+  color: color-mix(in srgb, var(--cat) 68%, black);
+}
+
+.cost-name {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+
+.cost-name b {
+  font-size: 15.5px;
+}
+
+.cost-name small,
+.cost-amount small {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.cost-amount {
+  display: grid;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cost-amount b {
+  font-size: 16px;
+}
+
+/* Year by year: a column per year */
+
+.year-chart-panel {
+  gap: 14px;
+}
+
+.year-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.year-col {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding-top: 4px;
+  color: var(--mute);
+  text-decoration: none;
+}
+
+.year-col-amount {
+  min-height: 18px;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.year-col-bar {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  width: 100%;
+  max-width: 30px;
+  transition: opacity 140ms ease-out;
+}
+
+.year-col-bar:empty {
+  height: 3px !important;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.year-col-bar i {
+  display: block;
+  min-height: 3px;
+  border-radius: 4px;
+  background: var(--cat);
+}
+
+.year-col[data-state="dim"] .year-col-bar {
+  opacity: 0.32;
+}
+
+.year-col-label {
+  min-height: 21px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.year-col[aria-current="page"] .year-col-label {
+  background: var(--ink);
+  color: #fff;
+}
+
+.cost-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.cost-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cost-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--cat);
+}
+
+.cost-counted {
+  padding: 0 4px;
+}
+
+.cost-counted ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  color: var(--mute);
+  font-size: 14.5px;
+}
+
+/* One kind of cost opened */
+
+.cost-category-title {
+  gap: 6px;
+}
+
+.cost-chip {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cat) 15%, white);
+  color: color-mix(in srgb, var(--cat) 62%, black);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cost-year {
+  display: grid;
+  gap: 16px;
+}
+
+.cost-items {
+  gap: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.cost-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.cost-item + .cost-item {
+  border-top: 1px solid var(--line);
+}
+
+.cost-item-main {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cost-item-main b {
+  font-size: 15.5px;
+}
+
+.cost-item-main small {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.cost-item-main .tag {
+  justify-self: start;
+  min-width: 0;
+  margin-bottom: 3px;
+}
+
+.cost-item-amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cost-item-amount.is-unknown {
+  color: var(--mute);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.cost-more {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .periods a,
+  .year-col-bar {
+    transition: none;
+  }
+}
+
+/* Kind of cost on the service form: one choice, shown as chips */
+
+.kind-pick {
+  gap: 8px;
+}
+
+.kind-pick legend {
+  margin-bottom: 6px;
+  font-size: 14.5px;
+  font-weight: 650;
+  color: var(--mute);
+}
+
+.kind-pick-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kind-pick-options label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px 0 13px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 140ms ease-out, border-color 140ms ease-out;
+}
+
+.kind-pick-options .cat-icon {
+  color: color-mix(in srgb, var(--cat) 68%, black);
+}
+
+.kind-pick-options input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kind-pick-options label:has(input:checked) {
+  border-color: var(--cat);
+  background: color-mix(in srgb, var(--cat) 14%, white);
+  box-shadow: inset 0 0 0 1px var(--cat);
+}
+
+.kind-pick-options label:has(input:focus-visible) {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.kind-pick small {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kind-pick-options label {
+    transition: none;
+  }
+}
+
+/* The smallest phones: tighter columns, and past eight years only every other year is labeled (always the newest and the open one). */
+@media (max-width: 360px) {
+  .year-chart {
+    gap: 2px;
+  }
+
+  .year-col-label {
+    padding: 1px 3px;
+    font-size: 12px;
+  }
+
+  .year-chart:has(> :nth-child(9)) .year-col:nth-last-child(even):not([aria-current]) .year-col-label {
+    visibility: hidden;
+  }
+}
+
+/* All cars or one car on the Costs tab: a track with the picked car on a white thumb */
+
+.cost-car-pick {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  padding: 3px;
+  border-radius: 999px;
+  background: #e9e3da;
+}
+
+.cost-car-pick a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--mute);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cost-car-pick a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cost-car-pick a i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--car);
+}
+
+.cost-car-pick a[aria-current="page"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(38, 34, 29, 0.14);
+}

@@ -1,0 +1,58 @@
+{
+  "name": "household-garage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted household vehicle maintenance, fuel, receipts, and costs.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "tsx scripts/start.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "auth:link": "tsx scripts/auth-link.ts",
+    "backup": "tsx scripts/backup.ts",
+    "backup:check": "tsx scripts/check-backup.ts",
+    "restore:stage": "tsx scripts/restore-stage.ts",
+    "icons": "tsx scripts/icons.ts",
+    "user:add": "tsx scripts/user-add.ts",
+    "import:budget-fuel": "tsx scripts/import-budget-fuel.ts"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.0.3",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.4",
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "tsx": "^4.23.15",
+    "web-push": "^3.6.7",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/web-push": "^3.6.4",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.3",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "better-sqlite3": false,
+    "esbuild": false,
+    "unrs-resolver": false
+  },
+  "license": "MIT"
+}
