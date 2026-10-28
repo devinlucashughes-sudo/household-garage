@@ -1,0 +1,28 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local data and secrets
+data/
+*.db
+*.db-*
+.env
+.env.*
+!.env.example
+
+# Scratch
+.tmp/
+
+# Private source captures and review evidence
+captures/
+followups/
+.impeccable/
+
+# Private tooling, release staging, and local exports
+.codex/
+*.zip
+*.csv
+*.pdf

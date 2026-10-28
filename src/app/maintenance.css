@@ -1,0 +1,153 @@
+.maintenance-form,
+.maintenance-form .fieldset,
+.maintenance-form .field,
+.maintenance-panel {
+  min-width: 0;
+}
+
+.maintenance-form .input {
+  caret-color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.maintenance-form .input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+.maintenance-form .input:disabled {
+  opacity: 0.65;
+}
+
+.maintenance-form ::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+.maintenance-form .notice {
+  border: 1px solid var(--red);
+}
+
+.maintenance-baseline {
+  margin-top: 12px;
+}
+
+.maintenance-baseline-preview {
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+
+.maintenance-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap);
+  cursor: pointer;
+}
+
+.maintenance-checkbox input {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  accent-color: var(--accent);
+}
+
+.maintenance-checkbox small {
+  display: block;
+  color: var(--mute);
+  font-size: 14px;
+}
+
+.maintenance-rows > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.maintenance-row-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  min-height: var(--tap);
+  padding: 14px 0 4px;
+  color: var(--ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.maintenance-row-link small {
+  grid-column: 1 / -1;
+  color: var(--mute);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.maintenance-state {
+  color: var(--mute);
+  font-size: 14px;
+}
+
+.maintenance-state--due {
+  color: var(--red);
+}
+
+.maintenance-basis-details summary {
+  display: list-item;
+  min-height: var(--tap);
+  padding: 14px 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.maintenance-basis {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 12px 20px;
+  color: var(--mute);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.maintenance-delete {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.maintenance-delete button,
+.maintenance-text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+}
+
+.maintenance-delete button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.maintenance-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.maintenance-form a,
+.maintenance-panel a {
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .maintenance-row-link:hover {
+    color: var(--accent);
+  }
+}
+
+.maintenance-row-link:active {
+  color: var(--accent-press);
+}
+
+@media (max-width: 360px) {
+  .maintenance-row-link {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `maintenance_schedules` ADD `optional` integer DEFAULT false NOT NULL;

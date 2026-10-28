@@ -1,0 +1,25 @@
+.fuel-form, .fuel-form .fieldset, .fuel-form .field { min-width: 0; }
+.fuel-form .input { min-width: 0; font-variant-numeric: tabular-nums; }
+.fuel-choice { display: flex; align-items: flex-start; gap: 12px; min-height: var(--tap); padding: 10px 0; cursor: pointer; }
+.fuel-choice input { flex: 0 0 auto; width: 24px; height: 24px; margin: 1px 0 0; accent-color: var(--accent); }
+.fuel-choice span { min-width: 0; }
+.fuel-choice small { display: block; color: var(--mute); font-size: 14px; margin-top: 4px; }
+.fuel-choice .field-error { color: var(--red); }
+.fuel-form .notice a, .fuel-delete .notice a { display: block; padding: 12px 0; min-height: var(--tap); }
+.fuel-form .input[aria-invalid="true"] { border-color: var(--red); }
+.fuel-history > li + li { border-top: 1px solid var(--line); }
+.fuel-history-link { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; min-height: var(--tap); color: var(--ink); text-decoration: none; }
+.fuel-history-link > span { min-width: 0; overflow-wrap: anywhere; }
+.fuel-history-link:hover, .fuel-history-link:active { color: var(--accent); }
+.fuel-history small { display: block; color: var(--mute); font-size: 14px; }
+.fuel-history-total { text-align: right; font-variant-numeric: tabular-nums; }
+.fuel-notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+.fuel-delete { display: grid; gap: 12px; }
+.fuel-delete-link { color: var(--red); }
+.fuel-danger { background: var(--red); color: var(--card); }
+.fuel-danger:active { background: var(--red); }
+.fuel-form :disabled, .fuel-delete :disabled { cursor: default; opacity: .6; }
+@media (max-width: 360px) {
+  .fuel-history-link { flex-direction: column; gap: 4px; }
+  .fuel-history-total { text-align: left; }
+}

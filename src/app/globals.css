@@ -1,0 +1,1759 @@
+/* Household Garage: a household planner for two cars. Warm paper ground, white cards, one color per
+   car, ink for the main action and blue for everything else you can press. See DESIGN.md. */
+
+:root {
+  --bg: #f7f3ec;
+  --card: #ffffff;
+  --field: #fbf9f5;
+  --ink: #26221d;
+  --mute: #6b645c;
+  --faint: #a39b90;
+  --line: #e8e2d8;
+  --line-strong: #d6cdbf;
+  --accent: #3558d4;
+  --accent-press: #2a47b3;
+  --accent-soft: #e3e9fb;
+  --red: #c0352b;
+  --red-soft: #fbe4e1;
+  --amber: #8f6106;
+  --amber-soft: #fbf0d4;
+  --green: #23774c;
+  --green-soft: #dfefe5;
+  --car: var(--accent);
+  --car-ink: var(--accent);
+  --car-soft: var(--accent-soft);
+  --shadow: 0 1px 2px rgba(38, 34, 29, 0.06);
+  --shadow-lift: 0 6px 16px rgba(38, 34, 29, 0.16);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --tap: 52px;
+  --gutter: 16px;
+  --bar-height: 68px;
+  /* Room below the status bar. iPhone blurs a band under it, so the first row starts below that. */
+  --top-gap: 28px;
+  --font: var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+/* One color per car, picked by car id so it never changes between screens. */
+.car-tone-0 { --car: #c9720e; --car-ink: #9a5507; --car-soft: #fbe9d3; }
+.car-tone-1 { --car: #3558d4; --car-ink: #3558d4; --car-soft: #dfe6fb; }
+.car-tone-2 { --car: #2e8a5b; --car-ink: #23774c; --car-soft: #dcefe4; }
+.car-tone-3 { --car: #8a4fbf; --car-ink: #7a3fb0; --car-soft: #efe3fa; }
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Page frame. Leaves room for the notch, the home indicator and the tab bar. */
+
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + var(--top-gap)) calc(env(safe-area-inset-right) + var(--gutter))
+    calc(env(safe-area-inset-bottom) + var(--bar-height) + 32px) calc(env(safe-area-inset-left) + var(--gutter));
+  display: grid;
+  gap: 16px;
+}
+
+.page--bare {
+  min-height: 100dvh;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  align-content: center;
+}
+
+/* The app's name beside its wrench icon: sign-in, setup and the home screen. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.brand .app-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.brand--large {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+.brand--large .app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mute);
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.lede {
+  color: var(--mute);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Panels: white cards on the paper ground */
+
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--gutter);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.panel h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.panel h3 {
+  font-size: 15px;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--tap);
+  border-top: 1px solid var(--line);
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.row small {
+  display: block;
+  color: var(--mute);
+  font-size: 14px;
+}
+
+/* Section headings between cards */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 4px -6px;
+}
+
+.section-head h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.section-head h2.is-due {
+  color: var(--red);
+}
+
+.section-head h2.is-unknown {
+  color: var(--amber);
+}
+
+.section-head h2.is-soon {
+  color: var(--amber);
+}
+
+.section-head a,
+.section-head span {
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.section-head span {
+  color: var(--mute);
+}
+
+/* Buttons. Ink is the main action; quiet buttons sit on the card. */
+
+.button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.button:active {
+  background: #000;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button--wide {
+  width: 100%;
+}
+
+.button--quiet {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+
+.button--quiet:active {
+  background: var(--bg);
+}
+
+.panel .button--quiet {
+  background: var(--field);
+}
+
+.button--soft-red {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.button--soft-red:active {
+  background: #f6d2cd;
+}
+
+.link-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  min-height: 44px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.link-button--danger {
+  color: var(--red);
+}
+
+/* Messages */
+
+.notice {
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.notice--error {
+  background: var(--red-soft);
+}
+
+.notice--good {
+  background: var(--green-soft);
+}
+
+.notice ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+/* Empty states: plain words, centered */
+
+.empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 20px var(--gutter);
+}
+
+/* Tab bar, in thumb reach. Every tab has the same icon box and label line, so labels share one
+   baseline; the Fill-up circle rises out of its box without moving anything else. */
+
+.tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: 8px calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 6px)
+    calc(env(safe-area-inset-left) + 6px);
+  background: var(--card);
+  border-top: 1px solid var(--line);
+}
+
+.tabbar-inner {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+  max-width: 560px;
+}
+
+.tab {
+  display: grid;
+  grid-template-rows: 32px 16px;
+  justify-items: center;
+  align-items: center;
+  row-gap: 4px;
+  min-width: 0;
+  padding-bottom: 2px;
+  color: var(--mute);
+  font-size: 11.5px;
+  font-weight: 650;
+  line-height: 16px;
+  text-decoration: none;
+}
+
+.tab-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
+}
+
+.tab-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab[aria-current="page"] {
+  color: var(--ink);
+}
+
+.tab[aria-current="page"] .tab-icon {
+  background: var(--bg);
+}
+
+.tab--fill {
+  color: var(--ink);
+}
+
+.tab--fill .tab-icon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  width: 62px;
+  height: 62px;
+  margin-left: -31px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 5px var(--card), 0 8px 18px rgba(38, 34, 29, 0.26);
+}
+
+.tab--fill .tab-icon svg {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  margin-top: -32px;
+  stroke: #fff;
+}
+
+.tab--fill[aria-current="page"] .tab-icon {
+  background: none;
+}
+
+.tab--fill[aria-current="page"] .tab-icon::before {
+  background: var(--accent);
+}
+
+.tab--fill:active .tab-icon::before {
+  background: #000;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button,
+  .tab-icon,
+  .tab-icon::before,
+  .seg a,
+  .car-pick span {
+    transition: background-color 140ms cubic-bezier(0.22, 1, 0.36, 1), color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* Home */
+
+.home-head {
+  display: grid;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.greeting h1 {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.greeting p {
+  margin-top: 2px;
+  color: var(--mute);
+  font-size: 15px;
+}
+
+.greeting strong {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.garage-actions,
+.car-tools {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.garage-actions .button,
+.car-tools .button {
+  min-width: 0;
+  padding-inline: 10px;
+  text-align: center;
+}
+
+/* Garage list: one card per car, two across */
+
+.car-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.car-card {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  height: 100%;
+  min-height: var(--tap);
+  position: relative;
+  overflow: hidden;
+  padding: 17px 14px 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* The car's color as a straight band across the top, clipped by the card's corners. */
+.car-card::before,
+.car-head::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: var(--car);
+}
+
+.car-card:active {
+  background: var(--field);
+}
+
+.car-card-name {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.car-card-name::after {
+  content: "›";
+  color: var(--faint);
+  font-weight: 400;
+}
+
+.car-card-model {
+  color: var(--mute);
+  font-size: 13.5px;
+  line-height: 1.3;
+}
+
+.car-card-miles {
+  margin-top: 10px;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.car-card-miles small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mute);
+  white-space: normal;
+}
+
+.car-card-rate {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.chip--due {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.chip--soon,
+.chip--unknown {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+/* Car name tag on rows that mix both cars */
+
+.tag {
+  display: inline-block;
+  min-width: 52px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: var(--car-soft);
+  color: var(--car-ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Car pages: a header card in the car's color, then its sections */
+
+.car-head {
+  display: grid;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+  padding: 17px 16px 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.car-head-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+.car-head-name h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.car-head-name span {
+  color: var(--mute);
+  font-size: 14px;
+}
+
+.car-head-miles {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 4px;
+}
+
+.car-head-miles strong {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.car-head-miles span {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.car-head-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  margin-top: 4px;
+}
+
+.car-head-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.seg {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.seg a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--mute);
+  font-size: 14.5px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.seg a[aria-current="page"] {
+  background: var(--car);
+  color: #fff;
+}
+
+/* The maintenance ledger: what it is and how often on the left, the limit and how far on the right */
+
+.ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.ledger > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: start;
+  min-height: 60px;
+  padding: 12px 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ledger-row:active {
+  background: var(--field);
+}
+
+.ledger-what .tag {
+  margin-bottom: 5px;
+}
+
+.ledger-what {
+  min-width: 0;
+}
+
+.ledger-what strong {
+  display: block;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.ledger-what small {
+  display: block;
+  margin-top: 2px;
+  color: var(--mute);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.ledger-when {
+  text-align: right;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-when small {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--green);
+}
+
+.ledger-when .is-due {
+  color: var(--red);
+}
+
+.ledger-when .is-soon,
+.ledger-when .is-unknown {
+  color: var(--amber);
+}
+
+.ledger-when .is-off {
+  color: var(--mute);
+}
+
+.ledger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+
+.ledger-actions .button {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+.ledger-more {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ledger-note {
+  margin: 0 4px;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+/* Fill-up: big numbers in cards, the car as a two-way switch */
+
+.fill-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fill-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.fill-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.car-pick {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.car-pick label {
+  position: relative;
+  cursor: pointer;
+}
+
+.car-pick input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.car-pick span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--car-ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.car-pick span::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--car);
+}
+
+.car-pick input:checked + span {
+  background: var(--car-soft);
+  box-shadow: inset 0 0 0 2px var(--car);
+}
+
+.car-pick input:focus-visible + span {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.big-field {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px 12px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: text;
+}
+
+.big-field:focus-within {
+  box-shadow: inset 0 0 0 2.5px var(--accent);
+}
+
+.big-field:has(.input[aria-invalid="true"]) {
+  box-shadow: inset 0 0 0 2.5px var(--red);
+}
+
+.big-field > span:first-child {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--mute);
+}
+
+.big-field-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.big-field .input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.big-field .input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.big-field .input::placeholder {
+  color: var(--line-strong);
+}
+
+.big-field-unit {
+  color: var(--mute);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.big-field small {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.big-field .field-error {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.big-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.big-pair .input {
+  font-size: 28px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 60px;
+  padding: 8px 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.setting-row strong {
+  display: block;
+  font-size: 16.5px;
+  font-weight: 700;
+}
+
+.setting-row small {
+  display: block;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.setting-row .field-error {
+  color: var(--red);
+}
+
+/* A checkbox drawn as an iOS-style switch */
+.switch {
+  appearance: none;
+  flex: 0 0 auto;
+  position: relative;
+  width: 52px;
+  height: 32px;
+  margin: 0;
+  border-radius: 16px;
+  background: var(--line-strong);
+  cursor: pointer;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.switch:checked {
+  background: var(--accent);
+}
+
+.switch:checked::after {
+  left: 23px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .switch,
+  .switch::after {
+    transition: background-color 160ms cubic-bezier(0.22, 1, 0.36, 1), left 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 4px 6px 4px 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.date-row > span {
+  font-size: 16.5px;
+  font-weight: 700;
+}
+
+.date-row .input {
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: var(--field);
+  font-weight: 600;
+}
+
+.fill-more {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.fill-more summary {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 14px;
+  color: var(--accent);
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+
+.fill-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.fill-more summary::after {
+  content: "›";
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 20px;
+  transform: rotate(90deg);
+}
+
+.fill-more[open] summary::after {
+  transform: rotate(-90deg);
+}
+
+.fill-more-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
+.fill-more .setting-row {
+  padding: 4px 0;
+  box-shadow: none;
+}
+
+/* Page heads below the top level: a back link, then the title */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: 44px;
+  margin: -8px 0 -10px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.title-block {
+  display: grid;
+  gap: 2px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-head a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: var(--tap);
+  min-height: 44px;
+  padding: 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.timeline-list { list-style: none; padding: 0; margin: 0; }
+.timeline-entry { padding: 14px 0; border-top: 1px solid var(--line); }
+.timeline-entry:first-child { border-top: 0; padding-top: 0; }
+.timeline-entry a { display: grid; gap: 4px; min-height: var(--tap); text-decoration: none; overflow-wrap: anywhere; }
+.timeline-entry strong { color: var(--ink); }
+.timeline-entry small { color: var(--mute); }
+.timeline-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 14px; font-variant-numeric: tabular-nums; }
+.timeline-filter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.timeline-filter .field { min-width: 0; }
+
+/* Forms: 17px text so iPhone doesn't zoom in, boxes as tall as a tap target */
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.fieldset legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field > span:first-child {
+  font-size: 14.5px;
+  font-weight: 650;
+  color: var(--mute);
+}
+
+.field small {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  caret-color: var(--accent);
+}
+
+.panel .input {
+  background: var(--field);
+}
+
+textarea.input {
+  min-height: 96px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.input::placeholder {
+  color: var(--faint);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+select.input {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b645c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+/* iOS draws date inputs its own way; keep the text left and the box full height. */
+.input[type="date"] {
+  display: flex;
+  align-items: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.input--big {
+  min-height: 64px;
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.unit-input {
+  position: relative;
+}
+
+.unit-input .input {
+  padding-right: 52px;
+}
+
+.unit-input > span {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--mute);
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.extra-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.form-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+input[type="checkbox"]:not(.switch),
+input[type="radio"] {
+  accent-color: var(--accent);
+}
+
+/* The Mileage Clock */
+
+.odometer {
+  display: grid;
+  gap: 4px;
+}
+
+.odometer-miles {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.odometer-miles .label {
+  font-size: 14px;
+}
+
+.odometer-basis {
+  color: var(--mute);
+  font-size: 14.5px;
+}
+
+/* Label/value lists: the quick-reference card and car details */
+
+.specs {
+  margin: 0;
+  display: grid;
+}
+
+.specs > div {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.specs > div:first-child {
+  border-top: 0;
+}
+
+.specs dt {
+  color: var(--mute);
+  font-size: 14.5px;
+}
+
+.specs dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.spec-group + .spec-group {
+  margin-top: 8px;
+}
+
+.spec-group h3 {
+  margin: 0 0 2px;
+}
+
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14.5px;
+  letter-spacing: 0.03em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A long form's save button stays in reach, just above the tab bar. */
+.save-bar {
+  position: sticky;
+  bottom: calc(env(safe-area-inset-bottom) + var(--bar-height) + 12px);
+  z-index: 5;
+  padding: 10px 0;
+  background: linear-gradient(to bottom, rgba(247, 243, 236, 0), var(--bg) 30%);
+}
+
+.fieldset.panel {
+  padding: var(--gutter);
+}
+
+/* Short number boxes share a row: front and rear pressure, the three wipers. */
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 12px;
+}
+
+.numbers .unit-input .input {
+  padding-right: 40px;
+}
+
+.remove-line {
+  min-width: var(--tap);
+  min-height: var(--tap);
+}
+
+/* Service history uses the same tap targets and single-column forms as the garage. */
+.service-history > li + li,
+.receipt-row + .receipt-row {
+  border-top: 1px solid var(--line);
+}
+
+.service-history-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 12px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.service-history-link:active {
+  color: var(--accent);
+}
+
+.service-history-main {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.service-history-main strong {
+  font-weight: 700;
+}
+
+.service-history-main small,
+.receipt-name small {
+  display: block;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+
+.service-history-total {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.service-form,
+.service-form .fieldset,
+.service-form .field {
+  min-width: 0;
+}
+
+.field-error,
+.field .field-error {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.service-item {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.service-item-amount {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.service-line-item {
+  align-items: baseline;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.service-line-item > span:last-child {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.service-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.receipt-row {
+  display: grid;
+  padding: 12px 0;
+}
+
+.receipt-name {
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+.receipt-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.receipt-actions > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.receipt-input {
+  padding: 12px;
+  min-width: 0;
+}
+
+@media (hover: hover) {
+  .service-history-link:hover,
+  .ledger-row:hover,
+  .car-card:hover {
+    background-color: var(--field);
+  }
+  .service-history-link:hover {
+    background: none;
+    color: var(--accent);
+  }
+}
+
+@media (max-width: 360px) {
+  .service-history-link {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .service-line-item {
+    flex-wrap: wrap;
+  }
+  .ledger-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ledger-when {
+    text-align: left;
+  }
+  .seg a {
+    font-size: 13.5px;
+  }
+}
+
+.ledger-section {
+  display: grid;
+  gap: 12px;
+}
+
+.ledger-what .ledger-optional {
+  color: var(--amber);
+  font-weight: 650;
+}
+
+.section-head h2.is-optional {
+  color: var(--mute);
+}
+
+.chosen-files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.chosen-files li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--field);
+  font-size: 14.5px;
+  overflow-wrap: anywhere;
+}
+
+.chosen-files small {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-thumb {
+  display: block;
+  justify-self: start;
+  margin-bottom: 4px;
+}
+
+.receipt-thumb img {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: var(--radius-sm);
+  background: var(--field);
+  object-fit: cover;
+}
+
+/* Sheets: a modal that rises from the bottom on a phone and sits centered on a wide screen. */
+.sheet {
+  width: min(560px, 100%);
+  max-width: 100%;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 -10px 30px rgba(38, 34, 29, 0.18);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet::backdrop {
+  background: rgba(38, 34, 29, 0.45);
+}
+
+.sheet-body {
+  display: grid;
+  gap: 14px;
+  padding: 18px var(--gutter) calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet-head h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.sheet-head h2 span {
+  display: block;
+  margin-top: 2px;
+  color: var(--mute);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+button.fill-close {
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .sheet {
+    margin: auto;
+    border-radius: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sheet[open] {
+    animation: sheet-rise 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sheet[open]::backdrop {
+    animation: sheet-fade 260ms ease-out;
+  }
+}
+
+@keyframes sheet-rise {
+  from { transform: translateY(32px); opacity: 0; }
+}
+
+@keyframes sheet-fade {
+  from { opacity: 0; }
+}
+
+/* A card that opens to show detail people rarely need. */
+.disclosure {
+  display: block;
+  padding: 0;
+}
+
+.disclosure summary {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 var(--gutter);
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure summary::after {
+  content: "›";
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 22px;
+  font-weight: 400;
+  transform: rotate(90deg);
+}
+
+.disclosure[open] summary::after {
+  transform: rotate(-90deg);
+}
+
+.disclosure > :not(summary) {
+  margin: 0 var(--gutter) var(--gutter);
+}

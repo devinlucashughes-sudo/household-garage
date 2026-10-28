@@ -1,0 +1,33 @@
+.tread-corners { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tread-corner { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--green-soft); color: var(--green); }
+.tread-corner small { color: var(--mute); font-size: 13px; font-weight: 600; }
+.tread-corner strong { font-size: 24px; font-weight: 800; line-height: 1.1; }
+.tread-corner strong span { font-size: 14px; font-weight: 700; margin-left: 1px; }
+.tread-corner--soon { background: var(--amber-soft); color: var(--amber); }
+.tread-corner--due { background: var(--red-soft); color: var(--red); }
+.tread-estimate { display: grid; gap: 4px; }
+.tread-estimate strong { font-size: 19px; font-weight: 800; }
+.tread-estimate--due strong { color: var(--red); }
+.tread-estimate p { margin: 0; color: var(--mute); font-size: 14.5px; }
+.tire-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.tire-row + .tire-row { border-top: 1px solid var(--line); }
+.tire-link { display: flex; align-items: center; gap: 12px; padding: 12px 0; min-height: var(--tap); color: var(--ink); text-decoration: none; }
+.tire-link:hover strong, .tire-link:active strong { color: var(--accent); }
+.tire-spot { flex: 0 0 auto; min-width: 44px; padding: 4px 6px; border-radius: 8px; background: var(--car-soft); color: var(--car-ink); font-size: 13px; font-weight: 800; text-align: center; }
+.tire-what { flex: 1 1 auto; min-width: 0; display: grid; gap: 2px; overflow-wrap: anywhere; }
+.tire-what small { color: var(--mute); font-size: 14px; }
+.tire-age { color: var(--faint); }
+.tire-age--old { color: var(--red); font-weight: 700; }
+.tire-chevron { color: var(--faint); font-size: 22px; }
+.tread-history { list-style: none; margin: 0; padding: 0; display: grid; }
+.tread-history li + li { border-top: 1px solid var(--line); }
+.tread-history a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; min-height: var(--tap); color: var(--ink); text-decoration: none; }
+.tread-history small { display: block; color: var(--mute); font-size: 14px; }
+.tread-history .num { text-align: right; white-space: nowrap; font-weight: 700; }
+.tread-fields .tread-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tread-input { display: flex; align-items: center; gap: 6px; }
+.tread-input .input { min-width: 0; font-variant-numeric: tabular-nums; }
+.tread-input small { color: var(--mute); font-weight: 700; }
+.tread-disclosure { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
+.tread-disclosure .tread-fields { padding: 0 var(--gutter) var(--gutter); }
+.tire-positions { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
